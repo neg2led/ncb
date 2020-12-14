@@ -22,7 +22,8 @@ app.config["SIJAX_STATIC_PATH"] = os.path.join('.', os.path.dirname(__file__), '
 app.config["SIJAX_JSON_URI"] = '/static/js/sijax/json2.js'
 app.config['BOOTSTRAP_SERVE_LOCAL'] = True
 app.config['BOOTSTRAP_USE_MINIFIED'] = True
-app.secret_key = 'A0Zr4FcD2K3LjmwS918jHH!jm84$#ssaWQsif!1'
+app.config['DEVICE_PARAMS'] = {'name': 'ericsson', 'with_ns': True}
+app.secret_key = 'x23j8PrM6FHwg8Yf26FNgpf8gQzmZgRWiKGPMiVRzUDA6j2t'
 from app import views
 
 flask_sijax.Sijax(app)

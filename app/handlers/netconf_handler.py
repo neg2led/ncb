@@ -17,7 +17,9 @@ from base_handler import BaseHandler
 from app.ncclientextensions.operations import SendCommand
 from lxml import etree
 from base64 import b64encode
-
+import sys,os,warnings
+warnings.simplefilter("ignore", DeprecationWarning)
+from flask import current_app
 
 class NetConfHandler(BaseHandler):
     """
@@ -34,6 +36,11 @@ class NetConfHandler(BaseHandler):
         # Create a variable for NetConf client manager
         self.clientManager = None
 
+    def get_keyfile(self, server_keyfile):
+        keyfile_path = os.path.join(os.path.dirname(current_app.instance_path), 'sshkey', server_keyfile)
+        #print(keyfile_path)
+        return str(keyfile_path)
+
     def get_capabilities(self, object_response, form_values):
         """
         Connect and return capabilities from the NetConf server
@@ -47,10 +54,10 @@ class NetConfHandler(BaseHandler):
             self.clientManager = manager.connect(host=form_values['server_ip'],
                                                  port=int(form_values['server_port']),
                                                  username=form_values['server_username'],
-                                                 password=form_values['server_password'],
+                                                 #key_filename=self.get_keyfile(form_values['server_keyfile']),
                                                  hostkey_verify=False,
-                                                 device_params={},
-                                                 look_for_keys=False, allow_agent=False)
+                                                 device_params=current_app.config['DEVICE_PARAMS'],
+                                                 look_for_keys=True, allow_agent=True)
 
             # If there is no exception, connection is successfully.
             # Execute connected() javascript function in the browser
@@ -77,9 +84,9 @@ class NetConfHandler(BaseHandler):
         finally:
 
             # Close NetConf connection if it has been established
-            if self.clientManager is not None:
+            """ if self.clientManager is not None:
                 if self.clientManager.connected:
-                    self.clientManager.close_session()
+                    self.clientManager.close_session() """
 
             # Update the progress bar. Executes the setProgressBar() javascript method in the browser
             object_response.script("setProgressBar(operations.response);")
@@ -97,15 +104,15 @@ class NetConfHandler(BaseHandler):
             self.clientManager = manager.connect(host=form_values['server_ip'],
                                                  port=int(form_values['server_port']),
                                                  username=form_values['server_username'],
-                                                 password=form_values['server_password'],
+                                                 #key_filename=self.get_keyfile(form_values['server_keyfile']),
                                                  hostkey_verify=False,
-                                                 device_params={},
-                                                 look_for_keys=False, allow_agent=False)
+                                                 device_params=current_app.config['DEVICE_PARAMS'],
+                                                 look_for_keys=True, allow_agent=True)
 
             # Create a new SendCommand instance with the parameters of the NetConf client manager.
             rpc_call = SendCommand(self.clientManager._session,
                                    device_handler=self.clientManager._device_handler,
-                                   async=self.clientManager._async_mode,
+                                   async_mode=self.clientManager._async_mode,
                                    timeout=self.clientManager._timeout,
                                    raise_mode=self.clientManager._raise_mode)
 
@@ -132,11 +139,6 @@ class NetConfHandler(BaseHandler):
             # Print in console the traceback error
             print print_exc()
         finally:
-
-            # Close NetConf connection if it has been established
-            if self.clientManager is not None:
-                if self.clientManager.connected:
-                    self.clientManager.close_session()
 
             # Update the progress bar. Executes the setProgressBar() javascript method in the browser
             object_response.script("setProgressBar(operations.response);")
