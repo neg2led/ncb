@@ -1,3 +1,3 @@
 Flask
 Flask-Sijax
-ncclient
+-e ./ncclient
